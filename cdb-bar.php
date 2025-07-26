@@ -8,6 +8,8 @@
  * Author URI: https://proyectocdb.es
  * License: GPL2
  * Text Domain: cdb-bar
+ * Requires at least: 5.0
+ * Tested up to: 6.3
  */
 
 // Bloqueo de acceso directo
@@ -18,6 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Definir constantes del plugin
 define('CDB_BAR_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('CDB_BAR_PLUGIN_URL', plugin_dir_url(__FILE__));
+
+// Cargar el text domain para traducciones
+function cdb_bar_load_textdomain() {
+    load_plugin_textdomain( 'cdb-bar', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'plugins_loaded', 'cdb_bar_load_textdomain' );
 
 // Incluir archivos de tipos de contenido personalizados (CPTs)
 require_once CDB_BAR_PLUGIN_DIR . 'includes/cpt-bar.php';

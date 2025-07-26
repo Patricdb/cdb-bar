@@ -133,10 +133,10 @@ function cdb_equipo_meta_box_callback($post) {
 // Guardar la selección del Bar y Año del Equipo
 function cdb_save_equipo_meta($post_id) {
     if (isset($_POST['cdb_equipo_bar'])) {
-        update_post_meta($post_id, '_cdb_equipo_bar', sanitize_text_field($_POST['cdb_equipo_bar']));
+        update_post_meta($post_id, '_cdb_equipo_bar', absint($_POST['cdb_equipo_bar']));
     }
     if (isset($_POST['cdb_equipo_year'])) {
-        update_post_meta($post_id, '_cdb_equipo_year', sanitize_text_field($_POST['cdb_equipo_year']));
+        update_post_meta($post_id, '_cdb_equipo_year', absint($_POST['cdb_equipo_year']));
     }
 }
 add_action('save_post_equipo', 'cdb_save_equipo_meta');
@@ -144,8 +144,8 @@ add_action('save_post_equipo', 'cdb_save_equipo_meta');
 // Generar automáticamente el título del equipo basado en el bar y el año
 function cdb_generar_titulo_equipo($data, $postarr) {
     if ($data['post_type'] === 'equipo' && !empty($_POST['cdb_equipo_bar']) && !empty($_POST['cdb_equipo_year'])) {
-        $bar_id = sanitize_text_field($_POST['cdb_equipo_bar']);
-        $year = sanitize_text_field($_POST['cdb_equipo_year']);
+        $bar_id = absint($_POST['cdb_equipo_bar']);
+        $year = absint($_POST['cdb_equipo_year']);
 
         // Obtener el nombre del bar asignado
         $bar_name = get_the_title($bar_id);

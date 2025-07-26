@@ -83,9 +83,9 @@ function cdb_bar_guardar_meta_box_zona( $post_id ) {
 	}
 	
 	// Guardar o limpiar el valor del campo.
-	if ( isset( $_POST['cdb_bar_zona_field'] ) ) {
-		$zona_id = sanitize_text_field( $_POST['cdb_bar_zona_field'] );
-		update_post_meta( $post_id, '_cdb_bar_zona_id', $zona_id );
-	}
+        if ( isset( $_POST['cdb_bar_zona_field'] ) ) {
+                $zona_id = absint( $_POST['cdb_bar_zona_field'] );
+                update_post_meta( $post_id, '_cdb_bar_zona_id', $zona_id );
+        }
 }
 add_action( 'save_post', 'cdb_bar_guardar_meta_box_zona' );

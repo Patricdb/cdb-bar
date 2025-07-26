@@ -86,13 +86,13 @@ function cdb_bar_save_meta($post_id) {
 
     // Guardar Año de Apertura (requerido)
     if (isset($_POST['cdb_bar_apertura']) && is_numeric($_POST['cdb_bar_apertura'])) {
-        update_post_meta($post_id, '_cdb_bar_apertura', sanitize_text_field($_POST['cdb_bar_apertura']));
+        update_post_meta($post_id, '_cdb_bar_apertura', absint($_POST['cdb_bar_apertura']));
     }
 
     // Guardar Año de Cierre (opcional, debe ser mayor o igual que el año de apertura)
     if (isset($_POST['cdb_bar_cierre']) && is_numeric($_POST['cdb_bar_cierre'])) {
         $apertura = get_post_meta($post_id, '_cdb_bar_apertura', true);
-        $cierre = sanitize_text_field($_POST['cdb_bar_cierre']);
+        $cierre = absint($_POST['cdb_bar_cierre']);
         
         if ($cierre >= $apertura) {
             update_post_meta($post_id, '_cdb_bar_cierre', $cierre);
