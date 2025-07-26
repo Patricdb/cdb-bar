@@ -24,6 +24,16 @@ function cdb_agregar_menu_revisiones() {
 }
 add_action( 'admin_menu', 'cdb_agregar_menu_revisiones' );
 
+// Registrar y encolar scripts para la página de revisiones
+function cdb_revisiones_admin_assets( $hook ) {
+    if ( 'bar_page_cdb_experiencias_revision' !== $hook ) {
+        return;
+    }
+    wp_enqueue_script( 'cdb-admin-revisiones', CDB_BAR_PLUGIN_URL . 'assets/js/admin-revisiones.js', array( 'jquery' ), '1.0.0', true );
+    wp_localize_script( 'cdb-admin-revisiones', 'cdb_revisiones', array( 'nonce' => wp_create_nonce( 'delete_experience_review_nonce' ) ) );
+}
+add_action( 'admin_enqueue_scripts', 'cdb_revisiones_admin_assets' );
+
 /**
  * Callback para renderizar la página de "Experiencias en Revisión".
  */
@@ -102,43 +112,7 @@ function cdb_experiencias_revision_callback() {
         <?php endif; ?>
     </div>
 
-    <!-- Script para gestionar la eliminación de revisiones vía AJAX -->
-    <script type="text/javascript">
-    jQuery(document).ready(function($) {
-        $('.delete-review').on('click', function(e) {
-            e.preventDefault();
-            if ( ! confirm('¿Estás seguro de eliminar esta revisión?') ) {
-                return;
-            }
-            var button = $(this);
-            var revisionId = button.data('revision');
 
-            $.ajax({
-                url: ajaxurl,
-                method: 'POST',
-                dataType: 'json',
-                data: {
-                    action: 'delete_experience_review',
-                    revision_id: revisionId,
-                    security: '<?php echo wp_create_nonce( "delete_experience_review_nonce" ); ?>'
-                },
-                success: function(response) {
-                    if ( response.success ) {
-                        // Remover la fila de la tabla.
-                        $('#revision-' + revisionId).fadeOut(300, function() {
-                            $(this).remove();
-                        });
-                    } else {
-                        alert('Error: ' + response.data);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    alert('Error en la solicitud: ' + error);
-                }
-            });
-        });
-    });
-    </script>
     <?php
 }
 

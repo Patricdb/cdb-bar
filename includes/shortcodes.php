@@ -1,8 +1,16 @@
 <?php
 // Asegurar que el archivo no se acceda directamente.
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+// Registrar los estilos y scripts utilizados por los shortcodes
+function cdb_shortcodes_register_assets() {
+    wp_register_style( 'cdb-tabla-equipo', CDB_BAR_PLUGIN_URL . 'assets/css/tabla-equipo.css', array(), '1.0.0' );
+    wp_register_script( 'cdb-tabla-equipo', CDB_BAR_PLUGIN_URL . 'assets/js/tabla-equipo.js', array( 'jquery' ), '1.0.0', true );
+    wp_localize_script( 'cdb-tabla-equipo', 'tabla_equipo', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
+}
+add_action( 'wp_enqueue_scripts', 'cdb_shortcodes_register_assets' );
 
 /**
  * Shortcode: [equipo_del_bar bar_id="123"]
@@ -188,46 +196,11 @@ function cdb_tabla_equipo_shortcode( $atts ) {
         } );
     }
 
+    wp_enqueue_style( 'cdb-tabla-equipo' );
+    wp_enqueue_script( 'cdb-tabla-equipo' );
+
     ob_start();
     ?>
-    <!-- Estilos en línea para mejorar la visual de la tabla (inspirados en "Tu experiencia laboral") -->
-    <style>
-        .tabla-equipo-container table {
-            width: 80%;
-            border-collapse: collapse;
-        }
-        .tabla-equipo-container table th,
-        .tabla-equipo-container table td {
-            text-align: left;
-        padding: 8px;
-       }
-        .tabla-equipo-container table th {
-            background-color: #f5f5f5;
-            font-weight: bold;
-        }
-        .tabla-equipo-container table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        .tabla-equipo-container table tr:hover {
-            background-color: #f1f1f1;
-        }
-        .tabla-equipo-container .btn-accion {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 4px;
-            margin: 0;
-            color: #555;
-        }
-        .tabla-equipo-container .btn-accion:hover {
-            color: #222;
-        }
-        .tabla-equipo-container table th:last-child,
-    .tabla-equipo-container table td:last-child {
-        text-align: right;
-         }
-    </style>
-
     <div class="tabla-equipo-container">
         <table>
             <thead>
@@ -289,80 +262,12 @@ function cdb_tabla_equipo_shortcode( $atts ) {
                     <?php endforeach; ?>
                 <?php else : ?>
                     <tr>
-                        <td colspan="4"><?php _e( 'No hay empleados asignados a este equipo.', 'text-domain' ); ?></td>
+                        <td colspan="4"><?php _e( 'No hay empleados asignados a este equipo.', 'cdb-bar' ); ?></td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
-
-    <!-- Script para gestionar la acción de marcado vía AJAX con confirmación mejorada -->
-    <script type="text/javascript">
-    jQuery(document).ready(function($) {
-        $('.mark-review').on('click', function(e) {
-            e.preventDefault();
-            var button = $(this);
-            var empleadoId = button.data('empleado');
-            var equipoId = button.data('equipo');
-
-            // Crear el diálogo de confirmación con estilos mejorados
-            var confirmDialog = $(
-                '<div class="confirm-review-dialog" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; border:4px solid #ccc; border-radius:16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding:20px; z-index:10000; width:300px;">' +
-                    '<p style="margin:0 0 20px; font-size:1.1em; text-align:center;">¿Deseas enviar éste empleado a revisión?</p>' +
-                    '<div style="text-align:center;">' +
-                        '<a href="#" class="cancel-review" style="margin-right:15px; padding:8px 16px; background:#f5f5f5; border:1px solid #ccc; border-radius:4px; text-decoration:none; color:#333;">Cancelar</a>' +
-                        '<a href="#" class="confirm-review" style="padding:8px 16px; background:#404040; border:1px solid #404040; border-radius:4px; text-decoration:none; color:#fff;">Enviar</a>' +
-                    '</div>' +
-                '</div>'
-            );
-
-            // Agregar el diálogo al body y mostrarlo
-            $('body').append(confirmDialog);
-            confirmDialog.fadeIn(200);
-
-            // Manejar clic en "Cancelar": cerrar el diálogo
-            confirmDialog.find('.cancel-review').on('click', function(e) {
-                e.preventDefault();
-                confirmDialog.fadeOut(200, function() {
-                    $(this).remove();
-                });
-            });
-
-            // Manejar clic en "Enviar": ejecutar la solicitud AJAX
-            confirmDialog.find('.confirm-review').on('click', function(e) {
-                e.preventDefault();
-                $.ajax({
-                    url: '<?php echo admin_url("admin-ajax.php"); ?>',
-                    method: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'mark_experience_review',
-                        empleado_id: empleadoId,
-                        equipo_id: equipoId
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            alert('Experiencia marcada para revisión.');
-                            // Deshabilitar el botón para evitar marcas duplicadas.
-                            button.prop('disabled', true);
-                        } else {
-                            alert('Error: ' + response.data);
-                        }
-                        confirmDialog.fadeOut(200, function() {
-                            $(this).remove();
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        alert('Error en la solicitud: ' + error);
-                        confirmDialog.fadeOut(200, function() {
-                            $(this).remove();
-                        });
-                    }
-                });
-            });
-        });
-    });
-    </script>
 
     <?php
     return ob_get_clean();
