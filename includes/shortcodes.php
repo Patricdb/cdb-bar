@@ -229,9 +229,12 @@ function cdb_tabla_equipo_shortcode( $atts ) {
 
     /*
      * (Opcional) Permite añadir otros atributos HTML al contenedor
-     * a través de un array clave => valor.
+     * a través de un array clave => valor. Por defecto se define
+     * la clase obtenida anteriormente.
      */
-    $table_attrs = apply_filters( 'cdb_tabla_equipo_table_attrs', array(), $equipo_id, $columns );
+    $table_attrs = array( 'class' => $table_class );
+    $table_attrs = apply_filters( 'cdb_tabla_equipo_table_attrs', $table_attrs, $equipo_id, $columns, $filas );
+
     $table_attrs_html = '';
     if ( ! empty( $table_attrs ) && is_array( $table_attrs ) ) {
         foreach ( $table_attrs as $attr_key => $attr_val ) {
@@ -241,7 +244,7 @@ function cdb_tabla_equipo_shortcode( $atts ) {
 
     ob_start();
     ?>
-    <div class="<?php echo esc_attr( $table_class ); ?>"<?php echo $table_attrs_html; ?>>
+    <div<?php echo $table_attrs_html; ?>>
         <table>
             <thead>
                 <tr>
@@ -359,10 +362,12 @@ add_shortcode( 'tabla_equipo', 'cdb_tabla_equipo_shortcode' );
  * }, 10, 3 );
  *
  * // Añadir atributos HTML al contenedor
- * add_filter( 'cdb_tabla_equipo_table_attrs', function( $attrs ) {
- *     $attrs['data-ejemplo'] = 'demo';
+ * add_filter( 'cdb_tabla_equipo_table_attrs', function( $attrs, $equipo_id, $cols, $rows ) {
+ *     $attrs['class'] .= ' extra-clase';
+ *     $attrs['data-equipo'] = $equipo_id;
+ *     $attrs['style'] = 'background:#fafafa';
  *     return $attrs;
- * } );
+ * }, 10, 4 );
  */
 
 /*
