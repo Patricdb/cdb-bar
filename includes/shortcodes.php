@@ -175,6 +175,19 @@ function cdb_tabla_equipo_shortcode( $atts ) {
         return '<p>ID de Equipo no válido.</p>';
     }
 
+    // Columnas por defecto de la tabla.
+    $columns = array(
+        'score'    => __( 'P.T. Gráfica', 'cdb-bar' ),
+        'empleado' => __( 'Empleado', 'cdb-bar' ),
+        'posicion' => __( 'Posición', 'cdb-bar' ),
+        'acciones' => __( 'Acciones', 'cdb-bar' ),
+    );
+    /*
+     * Permite personalizar las columnas mostradas.
+     * Snippets pueden eliminar o añadir columnas modificando el array.
+     */
+    $columns = apply_filters( 'cdb_tabla_equipo_columns', $columns, $equipo_id );
+
     global $wpdb;
     $tabla_exp = $wpdb->prefix . 'cdb_experiencia';
 
@@ -212,10 +225,9 @@ function cdb_tabla_equipo_shortcode( $atts ) {
         <table>
             <thead>
                 <tr>
-                    <th>P.T. Gráfica</th>
-                    <th>Empleado</th>
-                    <th>Posición</th>
-                    <th>Acciones</th>
+                    <?php foreach ( $columns as $col_key => $col_label ) : ?>
+                        <th><?php echo esc_html( $col_label ); ?></th>
+                    <?php endforeach; ?>
                 </tr>
             </thead>
             <tbody>
@@ -243,33 +255,58 @@ function cdb_tabla_equipo_shortcode( $atts ) {
                         }
                         ?>
                         <tr>
-                            <td><?php echo esc_html( $fila->emp_score ); ?></td>
-                            <td>
-                                <a href="<?php echo esc_url( $emp_link ); ?>">
-                                    <?php echo esc_html( $emp_title ); ?>
-                                </a>
-                            </td>
-                            <td>
-                                <?php if ( $pos_nombre ) : ?>
-                                    <a href="<?php echo esc_url( $pos_link ); ?>">
-                                        <?php echo esc_html( $pos_nombre ); ?>
-                                    </a>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <!-- Botón interactivo para marcar experiencia para revisión -->
-                                <button class="btn-accion mark-review"
-                                    data-empleado="<?php echo esc_attr( $empleado_id ); ?>"
-                                    data-equipo="<?php echo esc_attr( $equipo_id ); ?>"
-                                    title="Marcar para revisión">
-                                    <span class="dashicons dashicons-warning"></span>
-                                </button>
-                            </td>
+                            <?php foreach ( $columns as $col_key => $col_label ) : ?>
+                                <?php switch ( $col_key ) {
+                                    case 'score':
+                                        ?>
+                                        <td><?php echo esc_html( $fila->emp_score ); ?></td>
+                                        <?php
+                                        break;
+                                    case 'empleado':
+                                        ?>
+                                        <td>
+                                            <a href="<?php echo esc_url( $emp_link ); ?>">
+                                                <?php echo esc_html( $emp_title ); ?>
+                                            </a>
+                                        </td>
+                                        <?php
+                                        break;
+                                    case 'posicion':
+                                        ?>
+                                        <td>
+                                            <?php if ( $pos_nombre ) : ?>
+                                                <a href="<?php echo esc_url( $pos_link ); ?>">
+                                                    <?php echo esc_html( $pos_nombre ); ?>
+                                                </a>
+                                            <?php endif; ?>
+                                        </td>
+                                        <?php
+                                        break;
+                                    case 'acciones':
+                                        ?>
+                                        <td>
+                                            <!-- Botón interactivo para marcar experiencia para revisión -->
+                                            <button class="btn-accion mark-review"
+                                                data-empleado="<?php echo esc_attr( $empleado_id ); ?>"
+                                                data-equipo="<?php echo esc_attr( $equipo_id ); ?>"
+                                                title="Marcar para revisión">
+                                                <span class="dashicons dashicons-warning"></span>
+                                            </button>
+                                        </td>
+                                        <?php
+                                        break;
+                                    default:
+                                        ?>
+                                        <td></td>
+                                        <?php
+                                        break;
+                                } ?>
+                            <?php endforeach; ?>
                         </tr>
                     <?php endforeach; ?>
                 <?php else : ?>
                     <tr>
-                        <td colspan="4"><?php _e( 'No hay empleados asignados a este equipo.', 'cdb-bar' ); ?></td>
+                        <td colspan="<?php echo count( $columns ); ?>"><?php _e( 'No hay empleados asignados a este equipo.', 'cdb-bar' ); ?></td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -280,6 +317,16 @@ function cdb_tabla_equipo_shortcode( $atts ) {
     return ob_get_clean();
 }
 add_shortcode( 'tabla_equipo', 'cdb_tabla_equipo_shortcode' );
+
+/*
+ * Ejemplo de uso del filtro 'cdb_tabla_equipo_columns':
+ *
+ * add_filter( 'cdb_tabla_equipo_columns', function( $columns ) {
+ *     // Ocultar la columna de acciones
+ *     unset( $columns['acciones'] );
+ *     return $columns;
+ * } );
+ */
 
 /*
  * Ejemplo de uso del filtro 'cdb_tabla_equipo_rows':
