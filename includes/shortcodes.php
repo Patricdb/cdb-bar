@@ -194,6 +194,13 @@ function cdb_tabla_equipo_shortcode( $atts ) {
         usort( $filas, function( $a, $b ) {
             return $b->emp_score <=> $a->emp_score;
         } );
+
+        /*
+         * Permite a otros desarrolladores modificar o reordenar las filas antes
+         * de mostrar la tabla. Por ejemplo, un snippet podría ocultar empleados
+         * con puntuación 0 o alterar el orden.
+         */
+        $filas = apply_filters( 'cdb_tabla_equipo_rows', $filas, $equipo_id );
     }
 
     wp_enqueue_style( 'cdb-tabla-equipo' );
@@ -273,5 +280,22 @@ function cdb_tabla_equipo_shortcode( $atts ) {
     return ob_get_clean();
 }
 add_shortcode( 'tabla_equipo', 'cdb_tabla_equipo_shortcode' );
+
+/*
+ * Ejemplo de uso del filtro 'cdb_tabla_equipo_rows':
+ *
+ * add_filter( 'cdb_tabla_equipo_rows', function( $rows ) {
+ *     // Ocultar empleados con puntuación 0
+ *     $rows = array_filter( $rows, function( $row ) {
+ *         return $row->emp_score > 0;
+ *     } );
+ *
+ *     // Reordenar de menor a mayor
+ *     usort( $rows, function( $a, $b ) {
+ *         return $a->emp_score <=> $b->emp_score;
+ *     } );
+ *     return $rows;
+ * } );
+ */
 
 
