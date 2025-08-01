@@ -213,15 +213,35 @@ function cdb_tabla_equipo_shortcode( $atts ) {
          * de mostrar la tabla. Por ejemplo, un snippet podría ocultar empleados
          * con puntuación 0 o alterar el orden.
          */
-        $filas = apply_filters( 'cdb_tabla_equipo_rows', $filas, $equipo_id );
+    $filas = apply_filters( 'cdb_tabla_equipo_rows', $filas, $equipo_id );
     }
 
     wp_enqueue_style( 'cdb-tabla-equipo' );
     wp_enqueue_script( 'cdb-tabla-equipo' );
 
+    // Clase CSS por defecto para el contenedor de la tabla.
+    $table_class = 'tabla-equipo-container';
+    /*
+     * Permite personalizar la clase CSS del contenedor de la tabla.
+     * El filtro recibe la clase actual, el ID del equipo y las columnas.
+     */
+    $table_class = apply_filters( 'cdb_tabla_equipo_table_class', $table_class, $equipo_id, $columns );
+
+    /*
+     * (Opcional) Permite añadir otros atributos HTML al contenedor
+     * a través de un array clave => valor.
+     */
+    $table_attrs = apply_filters( 'cdb_tabla_equipo_table_attrs', array(), $equipo_id, $columns );
+    $table_attrs_html = '';
+    if ( ! empty( $table_attrs ) && is_array( $table_attrs ) ) {
+        foreach ( $table_attrs as $attr_key => $attr_val ) {
+            $table_attrs_html .= sprintf( ' %s="%s"', esc_attr( $attr_key ), esc_attr( $attr_val ) );
+        }
+    }
+
     ob_start();
     ?>
-    <div class="tabla-equipo-container">
+    <div class="<?php echo esc_attr( $table_class ); ?>"<?php echo $table_attrs_html; ?>>
         <table>
             <thead>
                 <tr>
@@ -325,6 +345,23 @@ add_shortcode( 'tabla_equipo', 'cdb_tabla_equipo_shortcode' );
  *     // Ocultar la columna de acciones
  *     unset( $columns['acciones'] );
  *     return $columns;
+ * } );
+ */
+
+/*
+ * Ejemplo de uso del filtro 'cdb_tabla_equipo_table_class':
+ *
+ * add_filter( 'cdb_tabla_equipo_table_class', function( $class, $equipo_id, $columns ) {
+ *     if ( 42 === $equipo_id ) {
+ *         $class .= ' tabla-especial';
+ *     }
+ *     return $class;
+ * }, 10, 3 );
+ *
+ * // Añadir atributos HTML al contenedor
+ * add_filter( 'cdb_tabla_equipo_table_attrs', function( $attrs ) {
+ *     $attrs['data-ejemplo'] = 'demo';
+ *     return $attrs;
  * } );
  */
 
